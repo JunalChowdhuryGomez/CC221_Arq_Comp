@@ -1,0 +1,51 @@
+;Valor calculado en modo1 27135.999999999985=27136--6A00h para generar 12hz
+;Valor calculado en modo1 43593.142857142855=43593--AA49h para generar 21hz
+org 8000h
+mov TMOD,#21h
+lcall print
+db 0dh,0ah,Seleccione la frecuencia ,0dh,0ah
+db con los botones P3.2 y P3.3,0
+espera_seleccion
+jnb P3.2,frec1
+jnb P3.3,frec2
+sjmp espera_seleccion
+frec1
+lcall print
+db 0dh,0ah,La Frecuencia del led es ,0
+mov A,#12
+lcall envio_dos_digitos
+sigue_frec12hz
+lcall frec12hz
+jnb P3.3,frec2
+sjmp sigue_frec12hz
+frec2
+lcall print
+db 0dh,0ah,La Frecuencia del led es,0
+mov A,#21
+lcall envio_dos_digitos
+sigue_frec21hz
+lcall frec21hz
+jnb P3.2,frec1
+sjmp sigue_frec21hz
+frec12hz
+jnb P3.3,sale
+mov TH0,#6Ah
+mov TL0,#0
+setb TR0
+jnb TF0,$
+cpl P1.0
+clr TF0
+sale
+ret
+frec21hz
+jnb P3.2,sale1
+mov TH0,#0AAh
+mov TL0,#49h
+setb TR0
+jnb TF0,$
+cpl p1.0
+clr TF0
+sale1
+ret
+$INCLUDE(subrutinasDeUsoFreq.inc)
+end
