@@ -1,0 +1,33 @@
+org 8000h
+lcall print
+db 0dh,0ah,"El menor numero es :",0
+mov R1,#0FFh ; Inicializa R1 con un valor alto que será reemplazado por el menor número encontrado
+mov R0,#10   ; Cantidad de elementos a comparar
+mov R2,#0    ; Hace las veces de "i"
+otra_vez:
+mov A,R2
+lcall obtiene_numero
+cmp A, R1   ; Compara el número actual con el mínimo encontrado hasta ahora
+jc actualizar_min ; Si A < R1, actualiza R1 con el nuevo mínimo
+inc R2
+djnz R0,otra_vez
+
+mov A, R1   ; Al final del bucle, A contiene el menor número encontrado
+lcall envio_dos_digitos
+lcall crlf
+
+ljmp 2F0h ; Retorno al monitor
+
+actualizar_min:
+mov R1, A   ; Actualiza el mínimo con el número actual
+ret
+
+obtiene_numero:
+inc A
+movc A,@A+PC
+ret
+
+db 1,9,2,6,8,7,5,13,12,10
+
+$INCLUDE(subrutinasDeUsoFreq.inc)
+end

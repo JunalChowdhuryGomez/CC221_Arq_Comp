@@ -1,0 +1,35 @@
+org 8000h
+
+lcall print
+db 0dh,0ah,"El mayor numero es :",0
+
+mov R1,#0    ; Inicializa R1 con un valor bajo que será reemplazado por el mayor número encontrado
+mov R0,#10   ; Cantidad de elementos a comparar
+mov R2,#0    ; Hace las veces de "i"
+
+otra_vez:
+mov A,R2
+lcall obtiene_numero
+
+cmp A, R1     ; Compara el número actual con el máximo encontrado hasta ahora
+jc skip_update ; Si A < R1, no actualiza R1
+mov R1, A     ; Actualiza R1 con el nuevo máximo
+skip_update:
+inc R2
+djnz R0,otra_vez
+
+mov A, R1   ; Al final del bucle, A contiene el mayor número encontrado
+lcall envio_dos_digitos
+lcall crlf
+
+ljmp 2F0h ; Retorno al monitor
+
+obtiene_numero:
+inc A
+movc A,@A+PC
+ret
+
+db 1,9,2,6,8,7,5,13,12,10
+
+$INCLUDE(subrutinasDeUsoFreq.inc)
+end
