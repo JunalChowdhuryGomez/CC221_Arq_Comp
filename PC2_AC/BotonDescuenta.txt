@@ -1,0 +1,81 @@
+org 8000h
+lcall inicioLCD
+mov R0,#offCur
+lcall wrLCDcom4
+
+clr IT0 ; fija la interrupción externa sensible en el nivel bajo
+clr IT1
+mov a, #0 ; fuente de interrupción externa 0
+mov dptr, #ISR0 ; fijar dptr con la dirección de inicio
+; de la interrupción externa 0 para llamar a setintvec
+lcall setintvec ; fija el ISR para INT0
+mov a, #2 ; fuente de interrupción externa 1
+mov dptr, #ISR1 ; fijar dptr con la dirección de inicio
+; de la interrupción externa 0 para llamar a setintvec
+lcall setintvec ; fija el ISR para INT0
+setb EX0 ; habilita interrupción externa 0 en el registro IE
+setb EX1
+setb EA ; flag de interrupción maestra del registro IE
+setb p3.2 ; fija el pin p3.2 como entrada botón conectado
+setb p3.3
+mov R7,#0
+mov A,R7
+lcall dos_digitos_decimales
+mov R0,30h
+lcall wrLCDdata4
+mov R0,31h
+lcall wrLCDdata4
+mov R0,#shlfcur
+lcall wrLCDcom4
+mov R0,#shlfcur
+lcall wrLCDcom4
+sjmp $ ;Se queda dando vueltas aqui
+ISR0:
+clr EX0
+mov A,#100
+lcall delay
+inc R7
+cjne R7,#20,continua
+mov R7,#0
+continua:
+mov A,R7
+lcall dos_digitos_decimales
+mov R0,30h
+lcall wrLCDdata4
+mov R0,31h
+lcall wrLCDdata4
+mov R0,#shlfcur
+lcall wrLCDcom4
+mov R0,#shlfcur
+lcall wrLCDcom4
+mov A,#100
+lcall delay
+setb EX0
+reti
+ISR1:
+clr EX1
+mov A,#100
+lcall delay
+cjne R7,#0,continua1
+mov R7,#19
+sjmp continua2
+continua1:
+dec R7
+continua2:
+mov A,R7
+lcall dos_digitos_decimales
+mov R0,30h
+lcall wrLCDdata4
+mov R0,31h
+lcall wrLCDdata4
+mov R0,#shlfcur
+lcall wrLCDcom4
+mov R0,#shlfcur
+lcall wrLCDcom4
+mov A,#100
+lcall delay
+setb EX1
+reti
+$INCLUDE(subrutinas_LCD_P1.inc)
+$INCLUDE(subrutinasDeUsoFreq.inc)
+end

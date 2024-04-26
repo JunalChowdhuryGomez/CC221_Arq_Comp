@@ -1,0 +1,125 @@
+flag_inter equ 20h
+org 8000h
+setb flag_inter ;
+mov TMOD,#21h
+lcall inicioLCD
+mov R0,#offCur
+lcall wrLCDcom4
+mov a, #0 ; fuente de interrupción externa 0
+mov dptr, #inter_ext0 ; fijar dptr
+lcall setintvec
+mov a, #1 ; Timer 0 es la fuente de interrupción
+mov dptr, #IntTimer0 ; IntTimer0 es la dirección inicial del ISR
+lcall setintvec ;Posibilita tener el ISR en RAM
+Setb TR0 ; inicia el timer 0
+Setb ET0 ; habilita interrupción del timer 0
+mov R6,#84;6x14 overflows. Después de 6 segundos
+mov a, #2 ; fuente de interrupción externa 1
+mov dptr, #inter_ext1 ; fijar dptr
+ lcall setintvec
+setb IT0
+ setb EX0
+ setb IT1
+ setb EX1
+ setb EA
+ setb P3.2
+ setb P3.3
+ setb TR0
+ mov A,#1
+ mov B,#4
+ lcall placeCur4
+ lcall prtLCD4
+ db "Mot1:ON ",0
+ mov A,#2
+ mov B,#0
+ lcall placeCur4
+ lcall prtLCD4
+ db "Mot2:ON Mot3:ON ",0
+ jb flag_inter,$
+ setb flag_inter
+ mov A,#1
+ mov B,#0
+ lcall placeCur4
+ mov R3,#10
+ mov R2,#9
+sigue_:
+ mov A,R2
+ lcall un_digito_decimal
+ jnb flag_inter,sale1
+ mov R0,30h
+ lcall wrLCDdata4
+ mov R0,#shlfCur
+ lcall wrLCDcom4
+ lcall sdelay
+ jnb flag_inter,sale1
+dec R2
+djnz R3,sigue_
+mov A,#1
+mov B,#2
+lcall placeCur4
+lcall prtLCD4
+db " Starship ",0
+mov A,#2
+mov B,#0
+lcall placeCur4
+lcall prtLCD4
+db " Se estrella ",0
+clr EA
+clr TR0
+ljmp 2F0h
+sale1:
+mov A,#1
+ mov B,#2
+ lcall placeCur4
+lcall prtLCD4
+db " Mot1:ON ",0
+ mov A,#2
+ mov B,#0
+ lcall placeCur4
+ lcall prtLCD4
+ db "Mot2:ON Mot3:ON ",0
+clr EA
+clr TR0
+ljmp 2F0h; Retorna al monitor
+inter_ext0:
+mov A,#1
+mov B,#2
+lcall placeCur4
+lcall prtLCD4
+db "No se resuelve",0
+mov A,#2
+mov B,#0
+lcall placeCur4
+lcall prtLCD4
+db "el Problema ",0
+mov A,#1
+mov B,#0
+lcall placeCur4
+reti
+inter_ext1:
+clr EX0
+clr flag_inter
+reti
+IntTimer0:
+djnz R6,sale_
+mov A,#1
+mov B,#3
+ lcall placeCur4
+lcall prtLCD4
+db "Mot1:ON ",0
+mov A,#2
+mov B,#0
+ lcall placeCur4
+lcall prtLCD4
+db "Mot2:OFFMot3:OFF",0
+clr Flag_Inter
+clr ET0
+clr TR0
+mov A,#1
+mov B,#0
+lcall placeCur4
+sale_:
+reti
+$INCLUDE(subrutinasDeUsoFreq.inc)
+$INCLUDE(subrutinas_LCD_P1.inc)
+ end

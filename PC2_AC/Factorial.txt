@@ -1,0 +1,31 @@
+org 8000h
+lcall inicioLCD
+lcall prtLCD4
+db "El factorial es:",0
+mov A,#2
+mov B,#11
+lcall placeCur4
+mov R0,#offCur
+lcall wrLCDcom4
+mov R1,#1 ;Para el resultado del factorial
+mov R2,#1 ;
+mov R3,#5
+otra_vez:
+mov A,R1
+mov B,R2
+mul AB
+mov R1,A
+inc R2
+djnz R3,otra_vez
+mov A,R1
+lcall tres_digitos_decimales
+mov R0,30h
+lcall wrLCDdata4
+mov R0,31h
+lcall wrLCDdata4
+mov R0,32h
+lcall wrLCDdata4
+ljmp 2F0h
+$INCLUDE(subrutinasDeUsoFreq.inc)
+$INCLUDE(subrutinas_LCD_P1.inc)
+ end
